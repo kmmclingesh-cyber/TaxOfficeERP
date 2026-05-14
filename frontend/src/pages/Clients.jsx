@@ -1,15 +1,9 @@
 import { useEffect, useState } from "react";
-
 import axios from "axios";
 
 function Clients() {
 
-  const user = JSON.parse(
-    localStorage.getItem("user")
-  );
-
   const [clients, setClients] = useState([]);
-
   const [showModal, setShowModal] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -19,22 +13,13 @@ function Clients() {
     status: "Active",
   });
 
-  /* =========================
-     FETCH CLIENTS
-  ========================= */
+  // FETCH CLIENTS
 
   const fetchClients = async () => {
-
     try {
-
-      const response = await axios.get(
-        "http://localhost:5000/clients"
-      );
-
-      setClients(response.data);
-
+      const res = await axios.get("http://localhost:5000/clients");
+      setClients(res.data);
     } catch (error) {
-
       console.log(error);
     }
   };
@@ -43,34 +28,23 @@ function Clients() {
     fetchClients();
   }, []);
 
-  /* =========================
-     HANDLE INPUT
-  ========================= */
+  // INPUT CHANGE
 
   const handleChange = (e) => {
-
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  /* =========================
-     ADD CLIENT
-  ========================= */
+  // ADD CLIENT
 
   const handleAddClient = async () => {
-
     try {
 
-      await axios.post(
-        "http://localhost:5000/clients",
-        formData
-      );
+      await axios.post("http://localhost:5000/clients", formData);
 
       fetchClients();
-
-      setShowModal(false);
 
       setFormData({
         name: "",
@@ -79,34 +53,28 @@ function Clients() {
         status: "Active",
       });
 
-    } catch (error) {
+      setShowModal(false);
 
+    } catch (error) {
       console.log(error);
     }
   };
 
-  /* =========================
-     DELETE CLIENT
-  ========================= */
+  // DELETE CLIENT
 
   const handleDeleteClient = async (id) => {
-
     try {
 
-      await axios.delete(
-        `http://localhost:5000/clients/${id}`
-      );
+      await axios.delete(`http://localhost:5000/clients/${id}`);
 
       fetchClients();
 
     } catch (error) {
-
       console.log(error);
     }
   };
 
   return (
-
     <div>
 
       {/* HEADER */}
@@ -135,9 +103,9 @@ function Clients() {
           <thead className="bg-gray-100">
 
             <tr>
-              <th className="text-left p-4">Name</th>
+              <th className="text-left p-4">Client Name</th>
               <th className="text-left p-4">PAN</th>
-              <th className="text-left p-4">GST</th>
+              <th className="text-left p-4">GSTIN</th>
               <th className="text-left p-4">Status</th>
               <th className="text-left p-4">Actions</th>
             </tr>
@@ -153,22 +121,14 @@ function Clients() {
                 className="border-t"
               >
 
-                <td className="p-4">
-                  {client.name}
-                </td>
-
-                <td className="p-4">
-                  {client.pan}
-                </td>
-
-                <td className="p-4">
-                  {client.gst}
-                </td>
+                <td className="p-4">{client.name}</td>
+                <td className="p-4">{client.pan}</td>
+                <td className="p-4">{client.gst}</td>
 
                 <td className="p-4">
 
                   <span
-                    className={`px-3 py-1 rounded-full text-white text-sm ${
+                    className={`px-3 py-1 rounded-full text-sm text-white ${
                       client.status === "Active"
                         ? "bg-green-500"
                         : "bg-yellow-500"
@@ -181,24 +141,16 @@ function Clients() {
 
                 <td className="p-4 flex gap-3">
 
-                  <button
-                    className="bg-blue-500 text-white px-3 py-1 rounded"
-                  >
+                  <button className="bg-blue-500 text-white px-3 py-1 rounded">
                     Edit
                   </button>
 
-                  {user?.role === "admin" && (
-
-                    <button
-                      onClick={() =>
-                        handleDeleteClient(client.id)
-                      }
-                      className="bg-red-500 text-white px-3 py-1 rounded"
-                    >
-                      Delete
-                    </button>
-
-                  )}
+                  <button
+                    onClick={() => handleDeleteClient(client.id)}
+                    className="bg-red-500 text-white px-3 py-1 rounded"
+                  >
+                    Delete
+                  </button>
 
                 </td>
 
@@ -238,7 +190,7 @@ function Clients() {
               <input
                 type="text"
                 name="pan"
-                placeholder="PAN"
+                placeholder="PAN Number"
                 value={formData.pan}
                 onChange={handleChange}
                 className="w-full border p-3 rounded-lg"
@@ -278,7 +230,7 @@ function Clients() {
                 onClick={handleAddClient}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg"
               >
-                Save
+                Save Client
               </button>
 
             </div>
