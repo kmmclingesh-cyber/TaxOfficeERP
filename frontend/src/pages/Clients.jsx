@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import axios from "axios";
 
 function Clients() {
@@ -16,11 +17,12 @@ function Clients() {
     status: "Active",
   });
 
-  // =========================
-  // LOAD CLIENTS
-  // =========================
+  /* =========================
+     FETCH CLIENTS
+  ========================= */
 
   const fetchClients = async () => {
+
     try {
 
       const res = await axios.get(
@@ -30,17 +32,22 @@ function Clients() {
       setClients(res.data);
 
     } catch (error) {
+
       console.log(error);
+
     }
+
   };
 
   useEffect(() => {
+
     fetchClients();
+
   }, []);
 
-  // =========================
-  // HANDLE INPUT
-  // =========================
+  /* =========================
+     HANDLE INPUT
+  ========================= */
 
   const handleChange = (e) => {
 
@@ -51,38 +58,37 @@ function Clients() {
 
   };
 
-  // =========================
-  // ADD / UPDATE CLIENT
-  // =========================
+  /* =========================
+     SAVE CLIENT
+  ========================= */
 
   const handleSaveClient = async () => {
 
     try {
 
-      // EDIT
+      // EDIT CLIENT
 
       if (editingClient) {
 
-        const updatedClients = clients.map((client) =>
-          client.id === editingClient.id
-            ? { ...formData, id: client.id }
-            : client
+        await axios.put(
+          `http://localhost:5000/clients/${editingClient.id}`,
+          formData
         );
-
-        setClients(updatedClients);
 
       } else {
 
-        // ADD
+        // ADD CLIENT
 
-        const newClient = {
-          id: Date.now(),
-          ...formData,
-        };
-
-        setClients([...clients, newClient]);
+        await axios.post(
+          "http://localhost:5000/clients",
+          formData
+        );
 
       }
+
+      // RELOAD CLIENTS
+
+      fetchClients();
 
       // RESET
 
@@ -98,28 +104,38 @@ function Clients() {
       setShowModal(false);
 
     } catch (error) {
+
       console.log(error);
+
     }
 
   };
 
-  // =========================
-  // DELETE CLIENT
-  // =========================
+  /* =========================
+     DELETE CLIENT
+  ========================= */
 
   const handleDeleteClient = async (id) => {
 
-    const updatedClients = clients.filter(
-      (client) => client.id !== id
-    );
+    try {
 
-    setClients(updatedClients);
+      await axios.delete(
+        `http://localhost:5000/clients/${id}`
+      );
+
+      fetchClients();
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
 
   };
 
-  // =========================
-  // EDIT CLIENT
-  // =========================
+  /* =========================
+     EDIT CLIENT
+  ========================= */
 
   const handleEditClient = (client) => {
 
@@ -150,6 +166,7 @@ function Clients() {
 
         <button
           onClick={() => {
+
             setEditingClient(null);
 
             setFormData({
@@ -160,6 +177,7 @@ function Clients() {
             });
 
             setShowModal(true);
+
           }}
           className="bg-blue-600 text-white px-5 py-2 rounded-lg"
         >
@@ -177,11 +195,27 @@ function Clients() {
           <thead className="bg-gray-100">
 
             <tr>
-              <th className="text-left p-4">Client Name</th>
-              <th className="text-left p-4">PAN</th>
-              <th className="text-left p-4">GSTIN</th>
-              <th className="text-left p-4">Status</th>
-              <th className="text-left p-4">Actions</th>
+
+              <th className="text-left p-4">
+                Client Name
+              </th>
+
+              <th className="text-left p-4">
+                PAN
+              </th>
+
+              <th className="text-left p-4">
+                GSTIN
+              </th>
+
+              <th className="text-left p-4">
+                Status
+              </th>
+
+              <th className="text-left p-4">
+                Actions
+              </th>
+
             </tr>
 
           </thead>
@@ -231,7 +265,9 @@ function Clients() {
                   </button>
 
                   <button
-                    onClick={() => handleDeleteClient(client.id)}
+                    onClick={() =>
+                      handleDeleteClient(client.id)
+                    }
                     className="bg-red-500 text-white px-3 py-1 rounded"
                   >
                     Delete
@@ -333,6 +369,7 @@ function Clients() {
     </div>
 
   );
+
 }
 
 export default Clients;
