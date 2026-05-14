@@ -4,7 +4,10 @@ import axios from "axios";
 function Clients() {
 
   const [clients, setClients] = useState([]);
+
   const [showModal, setShowModal] = useState(false);
+
+  const [editingClient, setEditingClient] = useState(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -13,12 +16,19 @@ function Clients() {
     status: "Active",
   });
 
-  // FETCH CLIENTS
+  // =========================
+  // LOAD CLIENTS
+  // =========================
 
   const fetchClients = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/clients");
+
+      const res = await axios.get(
+        "http://localhost:5000/clients"
+      );
+
       setClients(res.data);
+
     } catch (error) {
       console.log(error);
     }
@@ -28,23 +38,53 @@ function Clients() {
     fetchClients();
   }, []);
 
-  // INPUT CHANGE
+  // =========================
+  // HANDLE INPUT
+  // =========================
 
   const handleChange = (e) => {
+
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+
   };
 
-  // ADD CLIENT
+  // =========================
+  // ADD / UPDATE CLIENT
+  // =========================
 
-  const handleAddClient = async () => {
+  const handleSaveClient = async () => {
+
     try {
 
-      await axios.post("http://localhost:5000/clients", formData);
+      // EDIT
 
-      fetchClients();
+      if (editingClient) {
+
+        const updatedClients = clients.map((client) =>
+          client.id === editingClient.id
+            ? { ...formData, id: client.id }
+            : client
+        );
+
+        setClients(updatedClients);
+
+      } else {
+
+        // ADD
+
+        const newClient = {
+          id: Date.now(),
+          ...formData,
+        };
+
+        setClients([...clients, newClient]);
+
+      }
+
+      // RESET
 
       setFormData({
         name: "",
@@ -53,28 +93,51 @@ function Clients() {
         status: "Active",
       });
 
+      setEditingClient(null);
+
       setShowModal(false);
 
     } catch (error) {
       console.log(error);
     }
+
   };
 
+  // =========================
   // DELETE CLIENT
+  // =========================
 
   const handleDeleteClient = async (id) => {
-    try {
 
-      await axios.delete(`http://localhost:5000/clients/${id}`);
+    const updatedClients = clients.filter(
+      (client) => client.id !== id
+    );
 
-      fetchClients();
+    setClients(updatedClients);
 
-    } catch (error) {
-      console.log(error);
-    }
+  };
+
+  // =========================
+  // EDIT CLIENT
+  // =========================
+
+  const handleEditClient = (client) => {
+
+    setEditingClient(client);
+
+    setFormData({
+      name: client.name,
+      pan: client.pan,
+      gst: client.gst,
+      status: client.status,
+    });
+
+    setShowModal(true);
+
   };
 
   return (
+
     <div>
 
       {/* HEADER */}
@@ -86,7 +149,18 @@ function Clients() {
         </h1>
 
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            setEditingClient(null);
+
+            setFormData({
+              name: "",
+              pan: "",
+              gst: "",
+              status: "Active",
+            });
+
+            setShowModal(true);
+          }}
           className="bg-blue-600 text-white px-5 py-2 rounded-lg"
         >
           + Add Client
@@ -121,9 +195,17 @@ function Clients() {
                 className="border-t"
               >
 
-                <td className="p-4">{client.name}</td>
-                <td className="p-4">{client.pan}</td>
-                <td className="p-4">{client.gst}</td>
+                <td className="p-4">
+                  {client.name}
+                </td>
+
+                <td className="p-4">
+                  {client.pan}
+                </td>
+
+                <td className="p-4">
+                  {client.gst}
+                </td>
 
                 <td className="p-4">
 
@@ -141,7 +223,10 @@ function Clients() {
 
                 <td className="p-4 flex gap-3">
 
-                  <button className="bg-blue-500 text-white px-3 py-1 rounded">
+                  <button
+                    onClick={() => handleEditClient(client)}
+                    className="bg-blue-500 text-white px-3 py-1 rounded"
+                  >
                     Edit
                   </button>
 
@@ -173,7 +258,11 @@ function Clients() {
           <div className="bg-white p-6 rounded-xl w-full max-w-md">
 
             <h2 className="text-2xl font-bold mb-4">
-              Add Client
+
+              {editingClient
+                ? "Edit Client"
+                : "Add Client"}
+
             </h2>
 
             <div className="space-y-4">
@@ -227,7 +316,7 @@ function Clients() {
               </button>
 
               <button
-                onClick={handleAddClient}
+                onClick={handleSaveClient}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg"
               >
                 Save Client
@@ -242,6 +331,7 @@ function Clients() {
       )}
 
     </div>
+
   );
 }
 

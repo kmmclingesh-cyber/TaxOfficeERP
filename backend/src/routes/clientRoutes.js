@@ -1,24 +1,43 @@
 const express = require("express");
 
-const {
-  getClients,
-  addClient,
-  updateClient,
-  deleteClient,
-} = require("../controllers/clientController");
-
 const router = express.Router();
 
-/* =========================
-   ROUTES
-========================= */
+router.get("/", async (req, res) => {
 
-router.get("/", getClients);
+  res.json([
+    {
+      id: 1,
+      name: "ABC Traders",
+      pan: "ABCDE1234F",
+      gst: "33ABCDE1234F1Z5",
+      status: "Active",
+    },
 
-router.post("/", addClient);
+    {
+      id: 2,
+      name: "XYZ Exports",
+      pan: "XYZAB5678K",
+      gst: "29XYZAB5678K1Z2",
+      status: "Pending",
+    },
+  ]);
 
-router.put("/:id", updateClient);
+});
 
-router.delete("/:id", deleteClient);
+router.post("/", async (req, res) => {
+
+  res.json({
+    message: "Client Added Successfully",
+  });
+
+});
+
+router.delete("/:id", async (req, res) => {
+
+  res.json({
+    message: "Client Deleted Successfully",
+  });
+
+});
 
 module.exports = router;
