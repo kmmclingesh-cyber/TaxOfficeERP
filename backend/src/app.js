@@ -1,91 +1,24 @@
 const express = require("express");
 const cors = require("cors");
-
-const { PrismaClient } = require("@prisma/client");
-
-const prisma = new PrismaClient();
+const authRoutes = require("./routes/authRoutes");
+const clientRoutes = require("./routes/clientRoutes");
 
 const app = express();
 
-// Middleware
+/* =========================
+   MIDDLEWARE
+========================= */
 
 app.use(cors());
+
 app.use(express.json());
 
 /* =========================
-   GET CLIENTS
+   ROUTES
 ========================= */
 
-app.get("/clients", async (req, res) => {
-
-  const clients = await prisma.client.findMany({
-    orderBy: {
-      id: "desc",
-    },
-  });
-
-  res.json(clients);
-});
-
-/* =========================
-   ADD CLIENT
-========================= */
-
-app.post("/clients", async (req, res) => {
-
-  const { name, pan, gst, status } = req.body;
-
-  const newClient = await prisma.client.create({
-    data: {
-      name,
-      pan,
-      gst,
-      status,
-    },
-  });
-
-  res.json(newClient);
-});
-
-/* =========================
-   UPDATE CLIENT
-========================= */
-
-app.put("/clients/:id", async (req, res) => {
-
-  const id = Number(req.params.id);
-
-  const { name, pan, gst, status } = req.body;
-
-  const updatedClient = await prisma.client.update({
-    where: { id },
-    data: {
-      name,
-      pan,
-      gst,
-      status,
-    },
-  });
-
-  res.json(updatedClient);
-});
-
-/* =========================
-   DELETE CLIENT
-========================= */
-
-app.delete("/clients/:id", async (req, res) => {
-
-  const id = Number(req.params.id);
-
-  await prisma.client.delete({
-    where: { id },
-  });
-
-  res.json({
-    message: "Client Deleted Successfully",
-  });
-});
+app.use("/clients", clientRoutes);
+app.use("/auth", authRoutes);
 
 /* =========================
    SERVER

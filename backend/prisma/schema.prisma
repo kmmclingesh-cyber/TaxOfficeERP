@@ -15,3 +15,12 @@ model Client {
   status    String
   createdAt DateTime @default(now())
 }
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("staff")
+  createdAt DateTime @default(now())
+}

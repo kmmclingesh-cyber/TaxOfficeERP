@@ -1,15 +1,14 @@
 # Dependencies
-node_modules
+node_modules/
 
-# Environment variables
+# Environment files
 .env
-
-# Build files
-dist
-build
 
 # Logs
 npm-debug.log*
+
+# Build files
+dist/
 
 # OS files
 .DS_Store

@@ -1,41 +1,16 @@
 import { useEffect, useState } from "react";
+
 import axios from "axios";
 
 function Clients() {
 
-  // Client List State
+  const user = JSON.parse(
+    localStorage.getItem("user")
+  );
 
   const [clients, setClients] = useState([]);
 
-  // Modal State
-
   const [showModal, setShowModal] = useState(false);
-  const [editingClient, setEditingClient] = useState(null);
-  // Fetch Clients
-
-const fetchClients = async () => {
-
-  try {
-
-    const response = await axios.get(
-      "http://localhost:5000/clients"
-    );
-
-    setClients(response.data);
-
-  } catch (error) {
-
-    console.log(error);
-  }
-};
-
-// Load On Page Start
-
-useEffect(() => {
-  fetchClients();
-}, []);
-
-  // Form State
 
   const [formData, setFormData] = useState({
     name: "",
@@ -44,98 +19,97 @@ useEffect(() => {
     status: "Active",
   });
 
-  // Handle Input Change
+  /* =========================
+     FETCH CLIENTS
+  ========================= */
+
+  const fetchClients = async () => {
+
+    try {
+
+      const response = await axios.get(
+        "http://localhost:5000/clients"
+      );
+
+      setClients(response.data);
+
+    } catch (error) {
+
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchClients();
+  }, []);
+
+  /* =========================
+     HANDLE INPUT
+  ========================= */
 
   const handleChange = (e) => {
+
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  // Add Client
+  /* =========================
+     ADD CLIENT
+  ========================= */
 
-  // Add Client
+  const handleAddClient = async () => {
 
-const handleAddClient = async () => {
+    try {
 
-  // Edit Existing Client
+      await axios.post(
+        "http://localhost:5000/clients",
+        formData
+      );
 
-  if (editingClient) {
+      fetchClients();
 
-   await axios.put(
-  `http://localhost:5000/clients/${editingClient.id}`,
-  formData
-);
+      setShowModal(false);
 
-fetchClients();
+      setFormData({
+        name: "",
+        pan: "",
+        gst: "",
+        status: "Active",
+      });
 
-setEditingClient(null);
+    } catch (error) {
 
-  } else {
+      console.log(error);
+    }
+  };
 
-    // Add New Client
+  /* =========================
+     DELETE CLIENT
+  ========================= */
 
-await axios.post(
-  "http://localhost:5000/clients",
-  formData
-);
+  const handleDeleteClient = async (id) => {
 
-fetchClients();
-  }
+    try {
 
-  // Reset Form
+      await axios.delete(
+        `http://localhost:5000/clients/${id}`
+      );
 
-  setFormData({
-    name: "",
-    pan: "",
-    gst: "",
-    status: "Active",
-  });
+      fetchClients();
 
-  // Close Modal
+    } catch (error) {
 
-  setShowModal(false);
-};
-
-// Delete Client
-
-const handleDeleteClient = async (id) => {
-
-  try {
-
-    await axios.delete(
-      `http://localhost:5000/clients/${id}`
-    );
-
-    fetchClients();
-
-  } catch (error) {
-
-    console.log(error);
-  }
-};
-
-// Edit Client
-
-const handleEditClient = (client) => {
-
-  setEditingClient(client);
-
-  setFormData({
-    name: client.name,
-    pan: client.pan,
-    gst: client.gst,
-    status: client.status,
-  });
-
-  setShowModal(true);
-};
+      console.log(error);
+    }
+  };
 
   return (
+
     <div>
 
-      {/* Header */}
+      {/* HEADER */}
 
       <div className="flex justify-between items-center mb-6">
 
@@ -152,17 +126,7 @@ const handleEditClient = (client) => {
 
       </div>
 
-      {/* Search */}
-
-      <div className="mb-6">
-        <input
-          type="text"
-          placeholder="Search client..."
-          className="w-full md:w-80 border p-3 rounded-lg"
-        />
-      </div>
-
-      {/* Table */}
+      {/* TABLE */}
 
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
 
@@ -171,9 +135,9 @@ const handleEditClient = (client) => {
           <thead className="bg-gray-100">
 
             <tr>
-              <th className="text-left p-4">Client Name</th>
+              <th className="text-left p-4">Name</th>
               <th className="text-left p-4">PAN</th>
-              <th className="text-left p-4">GSTIN</th>
+              <th className="text-left p-4">GST</th>
               <th className="text-left p-4">Status</th>
               <th className="text-left p-4">Actions</th>
             </tr>
@@ -204,7 +168,7 @@ const handleEditClient = (client) => {
                 <td className="p-4">
 
                   <span
-                    className={`px-3 py-1 rounded-full text-sm text-white ${
+                    className={`px-3 py-1 rounded-full text-white text-sm ${
                       client.status === "Active"
                         ? "bg-green-500"
                         : "bg-yellow-500"
@@ -218,18 +182,23 @@ const handleEditClient = (client) => {
                 <td className="p-4 flex gap-3">
 
                   <button
-  onClick={() => handleEditClient(client)}
-  className="bg-blue-500 text-white px-3 py-1 rounded"
->
-  Edit
-</button>
-
-                  <button
-                   onClick={() => handleDeleteClient(client.id)}
-                   className="bg-red-500 text-white px-3 py-1 rounded"
+                    className="bg-blue-500 text-white px-3 py-1 rounded"
                   >
-                   Delete
+                    Edit
                   </button>
+
+                  {user?.role === "admin" && (
+
+                    <button
+                      onClick={() =>
+                        handleDeleteClient(client.id)
+                      }
+                      className="bg-red-500 text-white px-3 py-1 rounded"
+                    >
+                      Delete
+                    </button>
+
+                  )}
 
                 </td>
 
@@ -243,7 +212,7 @@ const handleEditClient = (client) => {
 
       </div>
 
-      {/* Modal */}
+      {/* MODAL */}
 
       {showModal && (
 
@@ -269,7 +238,7 @@ const handleEditClient = (client) => {
               <input
                 type="text"
                 name="pan"
-                placeholder="PAN Number"
+                placeholder="PAN"
                 value={formData.pan}
                 onChange={handleChange}
                 className="w-full border p-3 rounded-lg"
@@ -296,8 +265,6 @@ const handleEditClient = (client) => {
 
             </div>
 
-            {/* Buttons */}
-
             <div className="flex justify-end gap-3 mt-6">
 
               <button
@@ -311,7 +278,7 @@ const handleEditClient = (client) => {
                 onClick={handleAddClient}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg"
               >
-                {editingClient ? "Update Client" : "Save Client"}
+                Save
               </button>
 
             </div>
